@@ -13,4 +13,4 @@ class Normalize2048(gym.ObservationWrapper):
             )
 
     def observation(self, obs):
-        return obs / self.board_goal
+        return obs / self.unwrapped.board_goal

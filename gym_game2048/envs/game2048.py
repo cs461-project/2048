@@ -7,10 +7,11 @@ from gymnasium import spaces
 class Game2048(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 15}
 
-    def __init__(self, render_mode=None, size=4, goal=2048):
+    def __init__(self, render_mode=None, size=4, goal=2048, window_title="CS 461 - Term Project (Group 12) - 2048"):
         self.size = size
         self.window_width = 400
         self.window_height = 500
+        self.window_title = window_title
         self.goal = goal
         self.best_score = 0
 
@@ -20,9 +21,9 @@ class Game2048(gym.Env):
         assert math.log2(goal).is_integer() and (2 < math.log2(goal) < 256), "goal must be 0 or a power of 2 and 4 < goal < 2^256"
 
         # goal from the board's perspective
-        self.board_goal = int(np.log2(goal))
+        self.unwrapped.board_goal = int(np.log2(goal))
 
-        self.observation_space = spaces.Box(low=0, high=self.board_goal, shape=(1, size, size), dtype=np.uint8)
+        self.observation_space = spaces.Box(low=0, high=self.unwrapped.board_goal, shape=(1, size, size), dtype=np.uint8)
 
         # 0: left, 1: right, 2: up, 3: down
         self.action_space = spaces.Discrete(4)
@@ -281,7 +282,7 @@ class Game2048(gym.Env):
         self.best_score = max(self.best_score, self.score)
 
     def _is_reach_goal(self):
-        return np.any(self.board == self.board_goal)
+        return np.any(self.board == self.unwrapped.board_goal)
 
     def _render_block(self, r, c, canvas: pygame.Surface):
         number = self.board[r][c]
@@ -326,6 +327,8 @@ class Game2048(gym.Env):
         pygame.font.init()
         if self.window is None:
             pygame.init()
+
+            pygame.display.set_caption(self.window_title)
 
             # rendering : Size
             win_mg = 10

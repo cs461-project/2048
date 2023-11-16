@@ -15,7 +15,7 @@ class RewardByScore(gym.Wrapper):
         else:
             reward = np.sum(np.array(info['score_per_step'])) if len(info['score_per_step']) != 0 else 0
 
-        if info['max'] == self.board_goal:
+        if info['max'] == self.unwrapped.board_goal:
             reward += self.goal_bonus
 
         return obs, reward, terminated, truncated, info
