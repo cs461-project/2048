@@ -29,18 +29,6 @@ class MCTSAgent:
         else:
             return action
 
-    def save(self, path):
-        mcts, result_node = self.mcts, self.result_node
-        with open(path, "wb") as f:
-            pickle.dump(self, f)
-        self.mcts, self.result_node = mcts, result_node
-
-    def load(self, path):
-        with open(path, "rb") as f:
-            agent = pickle.load(f)
-        self.mcts, self.result_node = agent.mcts, agent.result_node
-        return self
-
 
 class ContinuousMCTSAgent(MCTSAgent):
 
