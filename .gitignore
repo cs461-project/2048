@@ -186,5 +186,7 @@ cython_debug/
 
 # CS 461 Project Related
 auxillary/
+testing/
+runs/
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode

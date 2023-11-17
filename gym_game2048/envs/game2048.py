@@ -5,7 +5,7 @@ import gymnasium as gym
 from gymnasium import spaces
 
 class Game2048(gym.Env):
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 15}
+    metadata = {"render_modes": ["human", "rgb_array", "terminal"], "render_fps": 15}
 
     def __init__(self, render_mode=None, size=4, goal=2048, window_title="CS 461 - Term Project (Group 12) - 2048"):
         self.size = size
@@ -65,7 +65,8 @@ class Game2048(gym.Env):
         return observation, info
 
     def _get_obs(self):
-        return np.expand_dims(self.board, axis=0)
+        # return np.expand_dims(self.board, axis=0)
+        return self.board
 
     def _get_info(self):
         return {'score_per_step': self.score_per_step, 'score': self.score,
@@ -397,6 +398,11 @@ class Game2048(gym.Env):
             # We need to ensure that human-rendering occurs at the predefined framerate.
             # The following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
+        elif self.render_mode == "terminal":
+            # pretty print the board. 1 -> 2, 2 -> 4, etc.
+            print("==============================")
+            print("\n".join(["\t".join([str(2 ** x) for x in row]) for row in self.board]))
+            print("==============================")
         else:  # rgb_array
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)

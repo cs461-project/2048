@@ -4,3 +4,4 @@ moviepy
 torch
 argparse
 wandb
+matplotlib
