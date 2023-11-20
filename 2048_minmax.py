@@ -12,25 +12,6 @@ import grid_helpers_2048 as Helper
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--exp-name",
-        type=str,
-        default=os.path.basename(__file__).rstrip(".py") + f"_{int(time.time())}",
-        help="the name of this experiment",
-    )
-    parser.add_argument(
-        "--goal",
-        type=int,
-        default=int(np.power(2, 32)),
-        help="the goal of the game, note that the game will end when the goal is reached",
-    )
-    parser.add_argument("--seed", type=int, default=1, help="seed of the experiment")
-    parser.add_argument(
-        "--env-id",
-        type=str,
-        default="gym_game2048/Game2048-v0",
-        help="the id of the gymnasium environment",
-    )
-    parser.add_argument(
         "--render-mode",
         type=str,
         default="human",
@@ -58,23 +39,22 @@ class MinMax:
     best_action: int
 
     def __init__(self) -> None:
-        best_action = None
+        self.best_action = None
 
     @classmethod
     def __convert_direction_format(cls, direction):
-        #two models have different direciton formats, this is for converting it
+        # two models have different direciton formats, this is for converting it
         if direction == 0:
-            return 1
+            return 2
         elif direction == 1:
-            return 3    
+            return 3
         elif direction == 2:
             return 0
         elif direction == 3:
-            return 2
+            return 1
         else:
             raise ValueError("Invalid direction value")
-            
-        
+
     # convert the game grid values to their powers of 2 to fit this model
     def min_max_search(self, grid, depth, is_max):
         new_grid = []
@@ -90,10 +70,10 @@ class MinMax:
 
     def _min_max_search(self, grid, depth, is_max):
         if depth == 0:
-            return self._evaluate(grid)
+            return self._reward(grid)
 
         if not Helper.canMove(grid):
-            return self._evaluate(grid) + self.BRANCH_FAILIURE_PENALTY
+            return self._reward(grid) + self.BRANCH_FAILIURE_PENALTY
 
         if is_max:
             v = -np.inf
@@ -104,7 +84,7 @@ class MinMax:
                 child_value = self._min_max_search(child, depth - 1, False)
                 if child_value > v:
                     v = child_value
-                    best_node_action = i
+                    best_node_action = moved[i]
             self.best_action = best_node_action
             return v
         else:
@@ -126,19 +106,39 @@ class MinMax:
         return available_cell_indices
 
     @classmethod
-    def _evaluate(cls, grid):
+    def _reward(cls, grid):
         total = 0
         # only heuristic used is the total value of the grid
-        total += cls.__get_grid_value_total(grid)
+        total += cls.__get_approximate_score(grid)
 
         return total
 
     @classmethod
-    def __get_grid_value_total(cls, grid):
+    def __get_approximate_score(cls, grid):
+        def score_formula(x):
+            """
+            this formula gives the totale score accumulated whilst generating the tile x
+            this includes the score accumulated during the the creation of tiles that were merged
+            (It assumes that all newly created tiles are created as 2s but this is negligable)
+            """
+            if x == 0:
+                return 0
+            x_log = np.log2(x)
+            return (x_log - 1) * 2**x_log
+
         total = 0
         for cell in grid:
-            total += cell
+            total += score_formula(cell)
         return total
+
+
+def check_tile_achieved(max_tiles: list[int], tile: int) -> list[int]:
+    count = 0
+
+    for max_tile in max_tiles:
+        if max_tile >= tile:
+            count += 1
+    return count
 
 
 if __name__ == "__main__":
@@ -151,8 +151,8 @@ if __name__ == "__main__":
 
     best_score = 0
     max_tree_depth = args.tree_depth
-
-    for i in range(1, args.num_episodes + 1):
+    number_of_episodes = args.num_episodes
+    for i in range(1, number_of_episodes + 1):
         print(f"Episode {i} started.\n")
         state = game.reset()
         done = False
@@ -169,9 +169,8 @@ if __name__ == "__main__":
             min_max = MinMax()
             action = min_max.min_max_search(current_state, max_tree_depth, True)
             observation, reward, terminated, truncated, info = game.step(action)
-            
+
             current_state = observation
-            done = terminated or truncated
 
             score = info["score"]
             max_tile = 2 ** info["max"]
@@ -181,7 +180,37 @@ if __name__ == "__main__":
 
             game.render()
 
-        episode_scores.append(score)
-        episode_max_tiles.append(max_tile)
+            if truncated or terminated:
+                done = True
+                episode_scores.append(score)
+                episode_max_tiles.append(max_tile)
 
-        # TODO: Print and save results to a file
+    print(f"Total number of episodes: {number_of_episodes}")
+    print(f"Minmax tree depth: {max_tree_depth}")
+    print("-----------------")
+    print(f"Average score: {np.mean(episode_scores)}")
+    print(f"Minimum score: {np.min(episode_scores)}")
+    print(f"Maximum score: {np.max(episode_scores)}")
+
+    print("-----------------")
+    count_512_achieved = check_tile_achieved(episode_max_tiles, 512)
+    print(
+        f"Tile 512 achieved in {count_512_achieved} / {number_of_episodes} episodes"
+        f"({count_512_achieved / number_of_episodes * 100}%)"
+    )
+    count_1024_achieved = check_tile_achieved(episode_max_tiles, 1024)
+    print(
+        f"Tile 1024 achieved in {count_1024_achieved} / {number_of_episodes} episodes"
+        f"({count_1024_achieved / number_of_episodes * 100}%)"
+    )
+    count_2048_achieved = check_tile_achieved(episode_max_tiles, 2048)
+    print(
+        f"Tile 2048 achieved in {count_2048_achieved} / {number_of_episodes} episodes"
+        f"({count_2048_achieved / number_of_episodes * 100}%)"
+    )
+    count_4096_achieved = check_tile_achieved(episode_max_tiles, 4096)
+    print(
+        f"Tile 4096 achieved in {count_4096_achieved} / {number_of_episodes} episodes"
+        f"({count_4096_achieved / number_of_episodes * 100}%)"
+    )
+
