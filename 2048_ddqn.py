@@ -290,6 +290,9 @@ def train(args):
     eps_end = args.epsilon_end
     eps_decay = args.epsilon_decay
 
+    episode_scores = []
+    episode_max_tiles = []
+
     if args.num_episodes == 0:
         args.num_episodes = float("inf")
 
@@ -309,6 +312,9 @@ def train(args):
         scores_window.append(score)
         scores.append(score)
         eps = max(eps_end, eps_decay*eps)
+
+        episode_scores.append(info["score"])
+        episode_max_tiles.append(2 ** info["max"])
 
         if i_episode % 5 == 0:
             print('\rEpisode {}\tAverage Score: {:.2f}\tEpsilon: {:.2f}'.format(i_episode, np.mean(scores_window), eps))
