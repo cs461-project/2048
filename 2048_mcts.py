@@ -247,8 +247,10 @@ if __name__ == "__main__":
 
             render(np.reshape(state, (-1, size)), score,  best_score, max_tile, i, step, render_mode=rm)
 
-        episode_scores.append(scores)
-        episode_max_tiles.append(maximum_tiles)
+        # Add last score to the list
+        episode_scores.append(scores[-1])
+        # Add maximum of the maximum tiles to the list
+        episode_max_tiles.append(max(maximum_tiles))
 
         if args.save_models or args.save_logs:
             os.makedirs(f"runs/{args.exp_name}", exist_ok=True)
