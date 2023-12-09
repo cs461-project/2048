@@ -65,10 +65,13 @@ class MinMax:
                 else:
                     new_grid.append(2**cell)
 
-        self._min_max_search(new_grid, depth, is_max)
+        alpha = -np.inf
+        beta = np.inf
+        self._min_max_search(new_grid, depth, is_max, alpha=alpha, beta=beta)
+
         return self.__convert_direction_format(self.best_action)
 
-    def _min_max_search(self, grid, depth, is_max):
+    def _min_max_search(self, grid, depth, is_max, alpha, beta):
         if depth == 0:
             return self._reward(grid)
 
@@ -81,10 +84,15 @@ class MinMax:
             (children, moved) = Helper.getAvailableChildren(grid)
             best_node_action = None
             for i, child in enumerate(children):
-                child_value = self._min_max_search(child, depth, False)
+                child_value = self._min_max_search(child, depth, False, alpha, beta)
+
                 if child_value > v:
                     v = child_value
                     best_node_action = moved[i]
+                alpha = max(alpha, child_value)
+                if beta <= alpha:
+                    break
+
             self.best_action = best_node_action
             return v
         else:
@@ -92,9 +100,27 @@ class MinMax:
             for cell_index in self.get_available_cells(grid):
                 gridcopy = list(grid)
                 gridcopy[cell_index] = 2
-                v = min(v, self._min_max_search(gridcopy, depth - 1, True))
+                v = min(
+                    v,
+                    self._min_max_search(
+                        gridcopy, depth - 1, True, alpha=alpha, beta=beta
+                    ),
+                )
+                beta = min(beta, v)
+                if beta <= alpha:
+                    break
+
                 gridcopy[cell_index] = 4
-                v = min(v, self._min_max_search(gridcopy, depth - 1, True))
+                v = min(
+                    v,
+                    self._min_max_search(
+                        gridcopy, depth - 1, True, alpha=alpha, beta=beta
+                    ),
+                )
+
+                beta = min(beta, v)
+                if beta <= alpha:
+                    break
             return v
 
     @classmethod
@@ -213,4 +239,3 @@ if __name__ == "__main__":
         f"Tile 4096 achieved in {count_4096_achieved} / {number_of_episodes} episodes"
         f"({count_4096_achieved / number_of_episodes * 100}%)"
     )
-
