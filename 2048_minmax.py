@@ -22,7 +22,7 @@ def parse_args():
         "--num-episodes", type=int, default=10, help="the number of episodes to run"
     )
     parser.add_argument(
-        "--tree-depth", type=int, default=2, help="the depth of the min-max tree"
+        "--tree-depth", type=int, default=3, help="the depth of the min-max tree"
     )
 
     args = parser.parse_args()
@@ -34,7 +34,11 @@ def parse_args():
 
 
 class MinMax:
-    BRANCH_FAILIURE_PENALTY = -1000000
+    BRANCH_FAILIURE_PENALTY = -100000
+    BIGGEST_TILE_IN_CORNER_BONUS = 1000
+    BIGGEST_TILE_IN_CENTER_PENALTY = -1000
+    EMPTY_TILE_BONUS = 400
+    CORNER_HEURISTIC_MULTIPLIER = 2
 
     best_action: int
 
@@ -134,8 +138,10 @@ class MinMax:
     @classmethod
     def _reward(cls, grid):
         total = 0
-        # only heuristic used is the total value of the grid
-        total += cls.__get_approximate_score(grid)
+
+        total += cls.__corner_heuristic(grid)
+
+        total = cls.__number_of_empty_cells(grid) * cls.EMPTY_TILE_BONUS
 
         return total
 
@@ -157,6 +163,32 @@ class MinMax:
             total += score_formula(cell)
         return total
 
+        
+    @classmethod
+    def __number_of_empty_cells(self, grid):
+        count = 0
+        for cell in grid:
+            if cell == 0:
+                count += 1
+        return count
+
+    @classmethod
+    def __corner_heuristic(cls, grid):
+        score = 0
+
+        # Define the weight for each corner
+        corner_weights = [[4, 3, 2, 1], 
+                          [3, 2, 1, 0], 
+                          [2, 1, 0, 0], 
+                          [1, 0, 0, 0]]
+
+        for i in range(4):
+            for j in range(4):
+                tile_value = grid[i * 4 + j]
+                score += tile_value * corner_weights[i][j]
+
+        return score
+
 
 def check_tile_achieved(max_tiles: list[int], tile: int) -> list[int]:
     count = 0
@@ -171,7 +203,7 @@ if __name__ == "__main__":
     args = parse_args()
     rm = args.render_mode
 
-    game = gym.make("gym_game2048/Game2048-v0", render_mode="human")
+    game = gym.make("gym_game2048/Game2048-v0", render_mode="human", goal=8192)
     episode_scores = []
     episode_max_tiles = []
 
