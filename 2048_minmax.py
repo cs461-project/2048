@@ -22,7 +22,7 @@ def parse_args():
         "--num-episodes", type=int, default=10, help="the number of episodes to run"
     )
     parser.add_argument(
-        "--tree-depth", type=int, default=4, help="the depth of the min-max tree"
+        "--tree-depth", type=int, default=2, help="the depth of the min-max tree"
     )
 
     args = parser.parse_args()
@@ -81,7 +81,7 @@ class MinMax:
             (children, moved) = Helper.getAvailableChildren(grid)
             best_node_action = None
             for i, child in enumerate(children):
-                child_value = self._min_max_search(child, depth - 1, False)
+                child_value = self._min_max_search(child, depth, False)
                 if child_value > v:
                     v = child_value
                     best_node_action = moved[i]
