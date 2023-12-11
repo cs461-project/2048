@@ -1,9 +1,8 @@
 import math
 
-# This module was copied from https://github.com/shahsahilj/2048/blob/master/Helper.py in order to
-# simulate the 2048 game with a more control
 
 #direction UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3
+
 
 def getAvailableChildren(grid):
     # gets all children and the moving directions
@@ -18,19 +17,6 @@ def getAvailableChildren(grid):
             children.append(gridcopy)
             moving.append(m)
     return [children, moving]
-
-
-def merge(cells):
-    # merges the cells and sends back in order to be inserted
-    if len(cells) <= 1:
-        return cells
-    i = 0
-    while i < len(cells) - 1:
-        if cells[i] == cells[i + 1]:
-            cells[i] *= 2
-            del cells[i + 1]
-        i += 1
-
 
 def move(grid, direction):
     # if there is a move it is changed and return is True
@@ -100,7 +86,6 @@ def move(grid, direction):
                 grid[j] = value
         return moved
 
-
 def canMove(grid):
     if 0 in grid:
         # if there is an empty space in the grid
@@ -117,3 +102,19 @@ def canMove(grid):
             if grid[i] == grid[i + 4]:
                 return True
     return False
+
+
+
+def merge(cells):
+    # merges the cells and sends back in order to be inserted
+    if len(cells) <= 1:
+        return cells
+    i = 0
+    while i < len(cells) - 1:
+        if cells[i] == cells[i + 1]:
+            cells[i] *= 2
+            del cells[i + 1]
+        i += 1
+
+
+

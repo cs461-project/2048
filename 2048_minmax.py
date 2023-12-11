@@ -161,7 +161,7 @@ def parse_args():
         "--num-episodes", type=int, default=10, help="the number of episodes to run"
     )
     parser.add_argument(
-        "--tree-depth", type=int, default=4, help="the depth of the min-max tree"
+        "--tree-depth", type=int, default=3, help="the depth of the min-max tree"
     )
 
     args = parser.parse_args()
@@ -172,7 +172,11 @@ def parse_args():
     return args
 
 class MinMax:
-    BRANCH_FAILIURE_PENALTY = -1000000
+    BRANCH_FAILIURE_PENALTY = -100000
+    BIGGEST_TILE_IN_CORNER_BONUS = 1000
+    BIGGEST_TILE_IN_CENTER_PENALTY = -1000
+    EMPTY_TILE_BONUS = 400
+    CORNER_HEURISTIC_MULTIPLIER = 2
 
     best_action: int
 
@@ -203,10 +207,13 @@ class MinMax:
                 else:
                     new_grid.append(2**cell)
 
-        self._min_max_search(new_grid, depth, is_max)
+        alpha = -np.inf
+        beta = np.inf
+        self._min_max_search(new_grid, depth, is_max, alpha=alpha, beta=beta)
+
         return self.__convert_direction_format(self.best_action)
 
-    def _min_max_search(self, grid, depth, is_max):
+    def _min_max_search(self, grid, depth, is_max, alpha, beta):
         if depth == 0:
             return self._reward(grid)
 
@@ -219,10 +226,15 @@ class MinMax:
             (children, moved) = Helper.getAvailableChildren(grid)
             best_node_action = None
             for i, child in enumerate(children):
-                child_value = self._min_max_search(child, depth - 1, False)
+                child_value = self._min_max_search(child, depth, False, alpha, beta)
+
                 if child_value > v:
                     v = child_value
                     best_node_action = moved[i]
+                alpha = max(alpha, child_value)
+                if beta <= alpha:
+                    break
+
             self.best_action = best_node_action
             return v
         else:
@@ -230,9 +242,27 @@ class MinMax:
             for cell_index in self.get_available_cells(grid):
                 gridcopy = list(grid)
                 gridcopy[cell_index] = 2
-                v = min(v, self._min_max_search(gridcopy, depth - 1, True))
+                v = min(
+                    v,
+                    self._min_max_search(
+                        gridcopy, depth - 1, True, alpha=alpha, beta=beta
+                    ),
+                )
+                beta = min(beta, v)
+                if beta <= alpha:
+                    break
+
                 gridcopy[cell_index] = 4
-                v = min(v, self._min_max_search(gridcopy, depth - 1, True))
+                v = min(
+                    v,
+                    self._min_max_search(
+                        gridcopy, depth - 1, True, alpha=alpha, beta=beta
+                    ),
+                )
+
+                beta = min(beta, v)
+                if beta <= alpha:
+                    break
             return v
 
     @classmethod
@@ -246,8 +276,10 @@ class MinMax:
     @classmethod
     def _reward(cls, grid):
         total = 0
-        # only heuristic used is the total value of the grid
-        total += cls.__get_approximate_score(grid)
+
+        total += cls.__corner_heuristic(grid)
+
+        total = cls.__number_of_empty_cells(grid) * cls.EMPTY_TILE_BONUS
 
         return total
 
@@ -269,6 +301,32 @@ class MinMax:
             total += score_formula(cell)
         return total
 
+        
+    @classmethod
+    def __number_of_empty_cells(self, grid):
+        count = 0
+        for cell in grid:
+            if cell == 0:
+                count += 1
+        return count
+
+    @classmethod
+    def __corner_heuristic(cls, grid):
+        score = 0
+
+        # Define the weight for each corner
+        corner_weights = [[4, 3, 2, 1], 
+                          [3, 2, 1, 0], 
+                          [2, 1, 0, 0], 
+                          [1, 0, 0, 0]]
+
+        for i in range(4):
+            for j in range(4):
+                tile_value = grid[i * 4 + j]
+                score += tile_value * corner_weights[i][j]
+
+        return score
+
 
 def check_tile_achieved(max_tiles: list[int], tile: int) -> list[int]:
     count = 0
@@ -283,7 +341,7 @@ if __name__ == "__main__":
     args = parse_args()
     rm = args.render_mode
 
-    game = gym.make("gym_game2048/Game2048-v0", render_mode="human")
+    game = gym.make("gym_game2048/Game2048-v0", render_mode="human", goal=8192)
     episode_scores = []
     episode_max_tiles = []
 
@@ -356,4 +414,3 @@ if __name__ == "__main__":
         f"Tile 4096 achieved in {count_4096_achieved} / {number_of_episodes} episodes"
         f"({count_4096_achieved / number_of_episodes * 100}%)"
     )
-
