@@ -41,7 +41,7 @@ def parse_args():
 window = None
 window_title = "CS 461 - Term Project (Group 12) - 2048 (w/ MCTS)"
 window_width = 400
-window_height = 550
+window_height = 600
 clock = None
 size = 4
 
@@ -59,7 +59,7 @@ block_font_size = []
 render_mode = "human"
 metadata = {"render_fps": 30}  # Modify the frame rate as needed
 
-def render(board, score, best_score, max_tile, episode=0, step=0, render_mode="human"):
+def render(board, score, best_score, max_tile, episode=0, _2048_count=0, step=0, render_mode="human"):
     global window, window_title, window_width, window_height, clock, size, board_size, block_size, block_x_pos, block_y_pos, left_top_board, block_color, game_color, block_font_color, block_font_size, metadata
 
     def _render_block(board, r, c, canvas: pygame.Surface):
@@ -93,15 +93,19 @@ def render(board, score, best_score, max_tile, episode=0, step=0, render_mode="h
         text_rect = text.get_rect(center=((block_x_pos[c] + block_size//2, block_y_pos[r] + block_size//2)))
         canvas.blit(text, text_rect)
 
-    def _render_info(canvas, score, best_score, max_tile):
+    def _render_info(canvas, score, best_score, max_tile, episode, _2048_count):
         info_font = pygame.font.Font(None, 35)
         score = info_font.render(f'score: {score}', True, (119, 110, 101))
         best_score = info_font.render(f'best: {best_score}', True, (119, 110, 101))
         max_tile = info_font.render(f'max tile: {max_tile}', True, (119, 110, 101))
+        episode = info_font.render(f'episode: {episode}', True, (119, 110, 101))
+        _2048_count = info_font.render(f'2048 count: {_2048_count}', True, (119, 110, 101))
 
         canvas.blit(score, (15, 25))
         canvas.blit(best_score, (15, 65))
         canvas.blit(max_tile, (15, 105))
+        canvas.blit(episode, (15, 145))
+        canvas.blit(_2048_count, (15, 185))
 
     pygame.font.init()
     if render_mode == "human" or render_mode == "human_only":
@@ -158,7 +162,7 @@ def render(board, score, best_score, max_tile, episode=0, step=0, render_mode="h
             for j in range(size):
                 _render_block(board, i, j, canvas)
 
-        _render_info(canvas, score, best_score, max_tile)
+        _render_info(canvas, score, best_score, max_tile, episode, _2048_count)
 
         window.blit(canvas, canvas.get_rect())
         pygame.event.pump()
@@ -332,6 +336,8 @@ if __name__ == "__main__":
 
     best_score = 0
 
+    _2048_count = 0
+
     for i in range (1, args.num_episodes + 1):
         print(f"Episode {i} started.\n")
         state = env.reset()
@@ -351,13 +357,17 @@ if __name__ == "__main__":
             score = info["score"]
             max_tile = 2 ** info["max"]
 
+            # check if 2048 is reached
+            if 2048 in info["score_per_step"]:
+                _2048_count += 1
+
             scores.append(score)
             maximum_tiles.append(max_tile)
 
             if score > best_score:
                 best_score = score
 
-            render(np.reshape(state, (-1, size)), score,  best_score, max_tile, i, step, render_mode=rm)
+            render(np.reshape(state, (-1, size)), score,  best_score, max_tile, i, _2048_count, step, render_mode=rm)
 
         # Add last score to the list
         episode_scores.append(scores[-1])
