@@ -279,7 +279,7 @@ class MinMax:
 
         total += cls.__corner_heuristic(grid)
 
-        total = cls.__number_of_empty_cells(grid) * cls.EMPTY_TILE_BONUS
+        # total = cls.__number_of_empty_cells(grid) * cls.EMPTY_TILE_BONUS
 
         return total
 
@@ -315,7 +315,7 @@ class MinMax:
         score = 0
 
         # Define the weight for each corner
-        corner_weights = [[4, 3, 2, 1], 
+        corner_weights = [[5, 3, 2, 1], 
                           [3, 2, 1, 0], 
                           [2, 1, 0, 0], 
                           [1, 0, 0, 0]]
