@@ -414,3 +414,8 @@ if __name__ == "__main__":
         f"Tile 4096 achieved in {count_4096_achieved} / {number_of_episodes} episodes"
         f"({count_4096_achieved / number_of_episodes * 100}%)"
     )
+    
+    print("Episode scores")
+    print(episode_scores)
+    print("Episode max tiles")
+    print(episode_max_tiles)
