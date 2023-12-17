@@ -14,3 +14,15 @@ Running the algorithms:
     For DDQN: `python 2048_ddqn.py`
         - You can adjust the parameters by passing them as arguments. For example, you can run the Min-Max Tree Search algorithm with a depth of 3 via `python 2048_minmax.py --depth 3`.
         - To see the full list of parameters, you can run `python 2048_minmax.py --help`, `python 2048_mcts.py --help`, or `python 2048_ddqn.py --help`.
+
+# Contributions by each team member:
+Ceren Akyar: MCTS experiments, plotting & inferring the results
+Deniz Mert Dilaverler: Implementation of Min-Max Tree Search and its experiments
+Berk Çakar: Implementation of MCTS, DDQN algorithms
+Elifsena Öz: DDQN experiments, plotting & inferring the results
+İpek Öztaş: DDQN experiments, plotting & inferring the results
+
+# Overlapping parts with other course projects or research
+The algorithms we learned in classes were re-implemented. 
+Additionally, our knowledge from the lectures helped us analyze the algorithms and their behaviors and interpret the plots.
+
