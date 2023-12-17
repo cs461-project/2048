@@ -1,0 +1,5 @@
+gymnasium==0.28.1
+pygame==2.5.2
+torch==1.13.1
+argparse==1.4.0
+matplotlib==3.5.3
