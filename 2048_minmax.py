@@ -6,8 +6,10 @@ from gymnasium.wrappers import FlattenObservation
 import numpy as np
 from gym_game2048.wrappers import RewardByScore
 import argparse
-import grid_helpers_2048 as Helper
+import grid_helpers_for_minmax as Helper
 import pygame
+import warnings
+warnings.filterwarnings("ignore")
 
 window = None
 window_title = "CS 461 - Term Project (Group 12) - 2048 (w/ MinMax)"
@@ -301,7 +303,7 @@ class MinMax:
             total += score_formula(cell)
         return total
 
-        
+
     @classmethod
     def __number_of_empty_cells(self, grid):
         count = 0
@@ -315,9 +317,9 @@ class MinMax:
         score = 0
 
         # Define the weight for each corner
-        corner_weights = [[5, 3, 2, 1], 
-                          [3, 2, 1, 0], 
-                          [2, 1, 0, 0], 
+        corner_weights = [[5, 3, 2, 1],
+                          [3, 2, 1, 0],
+                          [2, 1, 0, 0],
                           [1, 0, 0, 0]]
 
         for i in range(4):
@@ -328,7 +330,7 @@ class MinMax:
         return score
 
 
-def check_tile_achieved(max_tiles: list[int], tile: int) -> list[int]:
+def check_tile_achieved(max_tiles, tile):
     count = 0
 
     for max_tile in max_tiles:
@@ -414,7 +416,7 @@ if __name__ == "__main__":
         f"Tile 4096 achieved in {count_4096_achieved} / {number_of_episodes} episodes"
         f"({count_4096_achieved / number_of_episodes * 100}%)"
     )
-    
+
     print("Episode scores")
     print(episode_scores)
     print("Episode max tiles")

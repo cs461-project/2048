@@ -1,98 +1,36 @@
-# gym-game2048
+# CS 461 - Artificial Intelligence Term Project - Group 12
 
-https://github.com/helpingstar/gym-game2048/assets/54899900/b276a92b-bf1c-4e0f-aaf8-0236d38a5e7e
+## 2048 w/ Min-Max Tree Search, Monte Carlo Tree Search, and Double Deep Q-Network (DDQN)
 
-# Install
-```bash
-git clone https://github.com/helpingstar/gym-game2048.git
-cd gym-game2048
-pip install -r requirements.txt
-pip install -e .
-```
+_Ceren Akyar, Deniz Mert Dilaverler, Berk Çakar, Elifsena Öz, İpek Öztaş_
 
+---
 
-# Example
-```python
-import gymnasium as gym
-import gym_game2048
+## Running the algorithms:
 
-env = gym.make("gym_game2048/Game2048-v0", render_mode="human")
+1. First, ensure that you are running on Python 3.7. The algorithms are guaranteed to work on Python 3.7.
+2. Then, activate your virtual environment using conda, venv, or any other virtual environment manager.
+3. Install the requirements by running: `pip install -r requirements.txt`.
+4. Run the algorithms using the following commands:
+   - For Min-Max Tree Search: `python 2048_minmax.py`
+   - For Monte Carlo Tree Search: `python 2048_mcts.py`
+   - For DDQN: `python 2048_ddqn.py`
 
-observation, info = env.reset(seed=42)
-for _ in range(1000):
-    action = env.action_space.sample()  # this is where you would insert your policy
-    observation, reward, terminated, truncated, info = env.step(action)
-    if terminated or truncated:
-       observation, info = env.reset()
-env.close()
-```
+   - You can adjust the parameters by passing them as arguments. For example, you can run the Min-Max Tree Search algorithm with a depth of 3 via: `python 2048_minmax.py --depth 3`.
+   - To see the full list of parameters, you can run: `python 2048_minmax.py --help`, `python 2048_mcts.py --help`, or `python 2048_ddqn.py --help`.
 
-# Description
-A reinforcement learning environment based on the game 2048.
+---
 
-The 2048 game is a single-player puzzle game where the objective is to combine tiles with the same number to create a tile with the value 2048. Tiles can be moved up, down, left, or right, and when two tiles with the same number touch, they merge into one tile with the combined value. The game ends when there are no more moves available, or when a tile with the value 2048 is created.
+## Contributions by each team member:
 
-# Action Space
-There are 4 discrete deterministic actions:
-* 0 : Swipe left
-* 1 : Swipe right
-* 2 : Swipe up
-* 3 : Swipe down
+- **Ceren Akyar:** MCTS experiments, plotting & inferring the results
+- **Deniz Mert Dilaverler:** Implementation of Min-Max Tree Search and its experiments
+- **Berk Çakar:** Implementation of MCTS, DDQN algorithms
+- **Elifsena Öz:** DDQN experiments, plotting & inferring the results
+- **İpek Öztaş:** DDQN experiments, plotting & inferring the results
 
-# Observation Space
-The observation is a ndarray with shape (1, size, size).
+---
 
-The elements correspond to the following:
-* 0 : Blank cell
-* 1~ $\log_{2} (\text{goal})$ : $2^n$
+## Overlapping parts with other course projects or research
 
-# Rewards
-If you reach the goal, you get a reward of 1; if you don't reach the goal and the game ends, you get a reward of -1. In all other cases, you get a reward of 0.
-
-If you want to change the reward policy, use Wrappers.
-# Arguments
-* `size` : The size of the board. The board will be made to be the size of (size, size).
-* `goal`
-  * The number you want to reach. It should be entered as a power of two. The game ends when one of the numbers on the board becomes the `goal`.
-  * This environment supports up to $2^{255}$. However, it is difficult to reach even $2^{20}$, so it is not recommended to enter more than this as a factor.
-
-# Wrappers
-
-This is a personally created Wrapper. When applying, pay attention to the **priority** of wrappers.
-
-## Normalize2048
-
-Divide the number on the board by the log of goal, which is the largest number that can be on the board.
-
-Example)
-
-```
-# goal == 2048, log of goal == 11
-# Render
-| 512 | 16 | 4 | 8 |
-# Original Observation
-| 9 | 4 | 2 | 3
-# Normalized Observation
-| 0.81.. | 0.36.. | 0.18.. | 0.27.. |
-```
-
-## RewardConverter
-
-Change the reward system.
-
-* `goal`  : Rewards for clearing the game
-* `fail`  : Reward to receive when the game fails
-* `other` : A situation in which the game is neither goal nor fail
-
-## RewardByScore
-
-The reward system is determined based on the points obtained, not whether or not cleared.
-
-* `log` : Whether to take the log of each score
-* `goal_bonus` : Additional reward for clearing the game
-
-## TerminateIllegalWrapper
-
-The episode ends immediately upon Illegal Action.
-
-* `illegal_reward` : Reward to receive when terminated due to illegal action
+**Note:** For this course, we were exposed to new concepts and algorithms that we have never covered in any of our courses before. Therefore, this project does not have any overlapping parts with any of our previous projects. In that sense, the algorithms we learned in CS 461 were re-implemented. Additionally, our knowledge from the CS 461 lectures helped us analyze the algorithms and their behaviors and interpret the plots.

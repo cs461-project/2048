@@ -57,8 +57,8 @@ class Game2048(gym.Env):
         observation = self._get_obs()
         info = self._get_info()
 
-        if self.render_mode == "human":
-            self.render()
+        # if self.render_mode == "human":
+        #     self.render()
 
         self._update_legal_moves()
 
@@ -213,8 +213,8 @@ class Game2048(gym.Env):
 
         self._update_legal_moves()
 
-        if self.render_mode == "human":
-            self.render()
+        # if self.render_mode == "human":
+        #     self.render()
 
         return self._get_obs(), reward, terminated, False, self._get_info()
 

@@ -24,9 +24,6 @@ def parse_args():
     parser.add_argument("--env-id", type=str, default="gym_game2048/Game2048-v0", help="the id of the gymnasium environment")
     parser.add_argument("--render-mode", type=str, default="human", help="the mode to render the next_state", choices=["human", "human_only", "terminal"])
     parser.add_argument("--num-episodes", type=int, default=10, help="the number of episodes to run")
-    parser.add_argument("--save-logs", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True, help="whether to save logs into the `runs/{run_name}` folder")
-    parser.add_argument("--save-models", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True, help="whether to save models into the `runs/{run_name}` folder")
-    parser.add_argument("--load-model", type=str, default=None, help="the path to load the model from")
     parser.add_argument("--n", type=int, default=4, help="the size of the board")
     parser.add_argument("--mcts-simulations", type=int, default=400, help="the number of simulations to run for each step, i.e., the depth of the tree")
 
@@ -179,11 +176,6 @@ def render(board, score, best_score, max_tile, episode=0, _2048_count=0, step=0,
 
 def make_env(env_id, window_title, seed, args):
     def _thunk():
-        # TODO: Check if capturing a video is necessary
-        # if capture_video and idx == 0:
-        #     env = gym.make(env_id, render_mode="rgb_array", goal=args.goal)
-        #     env = gym.wrappers.RecordVideo(env, f"videos/{run_name}", episode_trigger=lambda x: (x % 500 == 0), disable_logger=True)
-        # else:
         env = gym.make(env_id, goal=args.goal, render_mode="terminal", window_title=window_title)
 
         #### Add Custom Wrappers ###
@@ -373,8 +365,3 @@ if __name__ == "__main__":
         episode_scores.append(scores[-1])
         # Add maximum of the maximum tiles to the list
         episode_max_tiles.append(max(maximum_tiles))
-
-        if args.save_models or args.save_logs:
-            os.makedirs(f"runs/{args.exp_name}", exist_ok=True)
-            # TODO: Implement a proper save function, if the model supports it
-            # agent.save(f"runs/{args.exp_name}/{os.path.basename(__file__).rstrip('.py')}_episode_{i}.pkl")
